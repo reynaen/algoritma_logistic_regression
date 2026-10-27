@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prediksi Pembatalan Reservasi Hotel</title>
+<style>
+  :root { --bg:#f4f6fb; --card:#fff; --ink:#1f2937; --muted:#6b7280; --brand:#2f4b8f; --bad:#b91c1c; --good:#15803d; --line:#e5e7eb; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--ink); }
+  header { background:var(--brand); color:#fff; padding:22px 16px; text-align:center; }
+  header h1 { margin:0; font-size:1.35rem; }
+  header p { margin:6px 0 0; font-size:.9rem; opacity:.85; }
+  main { max-width:860px; margin:24px auto; padding:0 16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:22px; margin-bottom:18px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
+  label { display:block; font-size:.85rem; font-weight:600; margin-bottom:4px; }
+  small { color:var(--muted); font-weight:400; }
+  input, select { width:100%; padding:9px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:.95rem; background:#fff; }
+  button { margin-top:18px; width:100%; padding:12px; font-size:1rem; font-weight:600; color:#fff; background:var(--brand); border:0; border-radius:8px; cursor:pointer; }
+  button:hover { filter:brightness(1.1); }
+  .result { text-align:center; }
+  .badge { display:inline-block; padding:8px 22px; border-radius:999px; font-size:1.25rem; font-weight:700; color:#fff; }
+  .badge.bad { background:var(--bad); } .badge.good { background:var(--good); }
+  .bar { height:14px; background:#e5e7eb; border-radius:999px; overflow:hidden; margin:16px 0 6px; }
+  .bar span { display:block; height:100%; background:var(--bad); }
+  .err { color:var(--bad); font-weight:600; }
+  .foot { font-size:.8rem; color:var(--muted); text-align:center; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Prediksi Risiko Pembatalan Reservasi Hotel</h1>
+  <p>Regresi Logistik &middot; Dataset Hotel Booking Demand</p>
+</header>
+<main>
+  {% if error %}<div class="card err">{{ error }}</div>{% endif %}
+  {% if result %}
+  <div class="card result">
+    <div class="badge {{ 'bad' if result.risky else 'good' }}">{{ result.label }}</div>
+    <div class="bar"><span style="width: {{ result.proba }}%"></span></div>
+    <p>Probabilitas batal: <strong>{{ result.proba }}%</strong> &middot; Probabilitas tidak batal: <strong>{{ result.proba_ok }}%</strong></p>
+    <small>Ambang batas klasifikasi 50%.</small>
+  </div>
+  {% endif %}
+
+  <form class="card" method="post">
+    <div class="grid">
+      {% for col in ['hotel','market_segment','deposit_type','customer_type'] %}
+      <div>
+        <label for="{{ col }}">{{ labels[col] }}</label>
+        <select name="{{ col }}" id="{{ col }}">
+          {% for c in cats[col] %}<option value="{{ c }}" {{ 'selected' if values[col]==c }}>{{ c }}</option>{% endfor %}
+        </select>
+      </div>
+      {% endfor %}
+      <div><label for="lead_time">Lead time <small>(hari sebelum kedatangan)</small></label>
+        <input type="number" min="0" max="800" name="lead_time" id="lead_time" value="{{ values.lead_time }}" required></div>
+      <div><label for="adults">Jumlah dewasa</label>
+        <input type="number" min="0" max="10" name="adults" id="adults" value="{{ values.adults }}" required></div>
+      <div><label for="children">Jumlah anak</label>
+        <input type="number" min="0" max="10" name="children" id="children" value="{{ values.children }}" required></div>
+      <div><label for="stays_in_weekend_nights">Malam akhir pekan</label>
+        <input type="number" min="0" max="20" name="stays_in_weekend_nights" id="stays_in_weekend_nights" value="{{ values.stays_in_weekend_nights }}" required></div>
+      <div><label for="stays_in_week_nights">Malam hari kerja</label>
+        <input type="number" min="0" max="40" name="stays_in_week_nights" id="stays_in_week_nights" value="{{ values.stays_in_week_nights }}" required></div>
+      <div><label for="adr">Tarif harian rata-rata <small>(ADR, EUR)</small></label>
+        <input type="number" min="0" max="1000" step="0.01" name="adr" id="adr" value="{{ values.adr }}" required></div>
+      <div><label for="is_repeated_guest">Tamu berulang</label>
+        <select name="is_repeated_guest" id="is_repeated_guest">
+          <option value="0" {{ 'selected' if values.is_repeated_guest|string=='0' }}>Bukan</option>
+          <option value="1" {{ 'selected' if values.is_repeated_guest|string=='1' }}>Ya</option>
+        </select></div>
+      <div><label for="previous_cancellations">Riwayat pembatalan sebelumnya</label>
+        <input type="number" min="0" max="30" name="previous_cancellations" id="previous_cancellations" value="{{ values.previous_cancellations }}" required></div>
+      <div><label for="booking_changes">Jumlah perubahan reservasi</label>
+        <input type="number" min="0" max="30" name="booking_changes" id="booking_changes" value="{{ values.booking_changes }}" required></div>
+      <div><label for="required_car_parking_spaces">Kebutuhan parkir mobil</label>
+        <input type="number" min="0" max="8" name="required_car_parking_spaces" id="required_car_parking_spaces" value="{{ values.required_car_parking_spaces }}" required></div>
+      <div><label for="total_of_special_requests">Permintaan khusus</label>
+        <input type="number" min="0" max="5" name="total_of_special_requests" id="total_of_special_requests" value="{{ values.total_of_special_requests }}" required></div>
+    </div>
+    <button type="submit">Prediksi</button>
+  </form>
+  <p class="foot">Model: {{ metrics.get('Recall', '') and 'Logistic Regression + SMOTE' }} &middot; AUC {{ metrics.AUC }} &middot; Recall {{ metrics.Recall }} &middot; Precision {{ metrics.Precision }}</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,73 @@
+{
+  "features": [
+    "lead_time",
+    "adults",
+    "children",
+    "stays_in_weekend_nights",
+    "stays_in_week_nights",
+    "previous_cancellations",
+    "booking_changes",
+    "required_car_parking_spaces",
+    "total_of_special_requests",
+    "adr",
+    "is_repeated_guest",
+    "hotel",
+    "market_segment",
+    "deposit_type",
+    "customer_type"
+  ],
+  "num_cols": [
+    "lead_time",
+    "adults",
+    "children",
+    "stays_in_weekend_nights",
+    "stays_in_week_nights",
+    "previous_cancellations",
+    "booking_changes",
+    "required_car_parking_spaces",
+    "total_of_special_requests",
+    "adr",
+    "is_repeated_guest"
+  ],
+  "cat_cols": [
+    "hotel",
+    "market_segment",
+    "deposit_type",
+    "customer_type"
+  ],
+  "model": "LogReg + SMOTE",
+  "metrics": {
+    "Accuracy": 0.7772,
+    "Precision": 0.6949,
+    "Recall": 0.7114,
+    "F1-Score": 0.7031,
+    "AUC": 0.8472
+  },
+  "categories": {
+    "hotel": [
+      "City Hotel",
+      "Resort Hotel"
+    ],
+    "market_segment": [
+      "Aviation",
+      "Complementary",
+      "Corporate",
+      "Direct",
+      "Groups",
+      "Offline TA/TO",
+      "Online TA",
+      "Undefined"
+    ],
+    "deposit_type": [
+      "No Deposit",
+      "Non Refund",
+      "Refundable"
+    ],
+    "customer_type": [
+      "Contract",
+      "Group",
+      "Transient",
+      "Transient-Party"
+    ]
+  }
+}
